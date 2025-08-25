@@ -1,12 +1,16 @@
-package org.xiaoguang.smartpropertymanagementsystemgb;
+package org.xiaoguang.smartpropertymanagementsystemgb.entity;
 
 import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class FeeType {
-    private Long feeTypeId;       // 费用类型ID
-    private String name;          // 类型名称
-    private String description;   // 描述
-    private Integer status;       // 状态(1-启用 0-禁用)
+    private Long id;              // 费用类型ID
+    private String name;          // 费用名称
+    private String description;   // 费用描述
+    private BigDecimal unitPrice; // 单价
+    private String unit;          // 单位
+    private LocalDateTime createTime; // 创建时间
+    private LocalDateTime updateTime; // 更新时间
 }
-    
