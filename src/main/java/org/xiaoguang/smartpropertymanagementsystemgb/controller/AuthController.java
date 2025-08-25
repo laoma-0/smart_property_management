@@ -4,32 +4,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.xiaoguang.smartpropertymanagementsystemgb.dto.UserRegisterDTO;
+import org.xiaoguang.smartpropertymanagementsystemgb.dto.LoginResponseDTO;
+import org.xiaoguang.smartpropertymanagementsystemgb.dto.UserLoginDTO;
 import org.xiaoguang.smartpropertymanagementsystemgb.entity.Result;
-import org.xiaoguang.smartpropertymanagementsystemgb.entity.User;
 import org.xiaoguang.smartpropertymanagementsystemgb.service.UserService;
 import jakarta.validation.Valid;
 
 /**
- * 用户控制器
+ * 认证控制器
  */
 @RestController
-@RequestMapping("/api/user")
-public class UserController {
+@RequestMapping("/api/auth")
+public class AuthController {
     
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
     /**
-     * 用户注册接口
-     * @param userRegisterDTO 用户注册信息
-     * @return 注册结果
+     * 用户登录接口
+     *
+     * @param userLoginDTO 用户登录信息
+     * @return 登录结果
      */
-    @PostMapping("/register")
-    public Result<User> register(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
-        return userService.register(userRegisterDTO);
+    @PostMapping("/login")
+    public Result<LoginResponseDTO> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
+        return userService.login(userLoginDTO);
     }
 }

@@ -1,11 +1,14 @@
 package org.xiaoguang.smartpropertymanagementsystemgb.service.impl;
 
 import org.springframework.stereotype.Service;
+import org.xiaoguang.smartpropertymanagementsystemgb.dto.LoginResponseDTO;
+import org.xiaoguang.smartpropertymanagementsystemgb.dto.UserLoginDTO;
 import org.xiaoguang.smartpropertymanagementsystemgb.dto.UserRegisterDTO;
 import org.xiaoguang.smartpropertymanagementsystemgb.entity.Result;
 import org.xiaoguang.smartpropertymanagementsystemgb.entity.User;
 import org.xiaoguang.smartpropertymanagementsystemgb.mapper.UserMapper;
 import org.xiaoguang.smartpropertymanagementsystemgb.service.UserService;
+import org.xiaoguang.smartpropertymanagementsystemgb.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -18,10 +21,13 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     
     private final PasswordEncoder passwordEncoder;
+    
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -51,8 +57,46 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
+    public Result<LoginResponseDTO> login(UserLoginDTO userLoginDTO) {
+        // 根据用户名查找用户
+        User user = userMapper.findByUsername(userLoginDTO.getUsername());
+        if (user == null) {
+            return Result.errorWithGeneric(400, "用户名或密码错误");
+        }
+        
+        // 验证密码
+        if (!passwordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
+            return Result.errorWithGeneric(400, "用户名或密码错误");
+        }
+        
+        // 检查用户状态
+        if (user.getStatus() != 1) {
+            return Result.errorWithGeneric(400, "用户已被禁用");
+        }
+        
+        // 生成JWT token
+        String token = jwtUtil.generateToken(user.getUsername());
+        
+        // 创建登录响应对象
+        LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
+        loginResponseDTO.setToken(token);
+        
+        // 清除密码避免返回给前端
+        user.setPassword(null);
+        loginResponseDTO.setUser(user);
+        loginResponseDTO.setExpiresIn(jwtUtil.getExpiration().intValue());
+        
+        return Result.success(loginResponseDTO, "登录成功");
+    }
+    
+    @Override
     public boolean existsByUsername(String username) {
         User user = userMapper.findByUsername(username);
         return user != null;
+    }
+    
+    @Override
+    public User findByUsername(String username) {
+        return userMapper.findByUsername(username);
     }
 }

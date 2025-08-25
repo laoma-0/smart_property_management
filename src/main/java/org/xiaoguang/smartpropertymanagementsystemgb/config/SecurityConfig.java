@@ -22,7 +22,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/user/register").permitAll()  // 允许用户注册接口无需认证访问
+                .requestMatchers("/api/user/register", "/api/auth/login").permitAll()  // 允许用户注册和登录接口无需认证访问
                 .anyRequest().authenticated()  // 其他所有请求都需要认证
             );
         return http.build();
